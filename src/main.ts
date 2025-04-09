@@ -1,17 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { apiReference } from '@scalar/nestjs-api-reference'; // Import Scalar
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Serve custom Swagger UI static files
-  app.useStaticAssets(join(__dirname, '..', 'public', 'swagger-ui'), {
-    prefix: '/api-docs',
-  });
-
+  // Generate OpenAPI document (same as before)
   const config = new DocumentBuilder()
     .setTitle('Ads Backend API')
     .setDescription('API for managing advertisements')
@@ -20,8 +16,19 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
 
-  // Still setup the JSON endpoint
+  // Keep /api-docs-json endpoint for the raw JSON (optional)
   SwaggerModule.setup('api-docs', app, document);
+
+  // Add Scalar UI at /reference (or any path you prefer)
+  app.use(
+    '/reference',
+    apiReference({
+      spec: {
+        content: document, // Use the OpenAPI document directly
+      },
+      theme: 'default', // Optional: Customize the look (e.g., 'purple', 'solarized')
+    }),
+  );
 
   await app.listen(3000);
 }

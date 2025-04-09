@@ -12,7 +12,7 @@
       "dest": "dist/main.js"
     },
     {
-      "src": "/api-docs(/(.*))?",
+      "src": "/reference(/(.*))?",
       "dest": "dist/main.js"
     },
     {
